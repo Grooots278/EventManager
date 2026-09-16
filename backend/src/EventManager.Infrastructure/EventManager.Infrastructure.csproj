@@ -15,4 +15,14 @@
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Persistence\Configurations\" />
+    <Folder Include="Persistence\Migrations\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EventManager.Application\EventManager.Application.csproj" />
+    <ProjectReference Include="..\EventManager.Domain\EventManager.Domain.csproj" />
+  </ItemGroup>
+
 </Project>
