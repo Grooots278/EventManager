@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/EventManager.API/EventManager.API.csproj" />
+    <Project Path="src/EventManager.Application/EventManager.Application.csproj" />
+    <Project Path="src/EventManager.Domain/EventManager.Domain.csproj" />
+    <Project Path="src/EventManager.Infrastructure/EventManager.Infrastructure.csproj" />
+    <Project Path="src/EventManager.Worker/EventManager.Worker.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/EventManager.IntegrationTests/EventManager.IntegrationTests.csproj" />
+    <Project Path="tests/EventManager.UnitTests/EventManager.UnitTests.csproj" />
+  </Folder>
+</Solution>
