@@ -14,4 +14,10 @@
     <ProjectReference Include="..\EventManager.Domain\EventManager.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Authentication\Commands\Login\" />
+    <Folder Include="Authentication\Commands\Logout\" />
+    <Folder Include="Authentication\Commands\Refresh\" />
+  </ItemGroup>
+
 </Project>
