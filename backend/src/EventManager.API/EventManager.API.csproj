@@ -10,4 +10,9 @@
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\EventManager.Application\EventManager.Application.csproj" />
+    <ProjectReference Include="..\EventManager.Infrastructure\EventManager.Infrastructure.csproj" />
+  </ItemGroup>
+
 </Project>
