@@ -24,6 +24,10 @@ public sealed class PasswordHasher
         string password,
         string passwordHash)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(password);
+
+        ArgumentException.ThrowIfNullOrWhiteSpace(passwordHash);
+
         var result = _hasher.VerifyHashedPassword(
             new object(),
             passwordHash,

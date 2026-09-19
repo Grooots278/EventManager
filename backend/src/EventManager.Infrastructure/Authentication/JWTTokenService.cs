@@ -24,6 +24,8 @@ public sealed class JWTTokenService : IJWTTokenService
     {
         _options = options.Value;
         _db = db;
+
+        ValidateOptions();
     }
 
     public async Task<AuthenticationResponse>
@@ -52,7 +54,7 @@ public sealed class JWTTokenService : IJWTTokenService
         };
 
         var key = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(_options.SecretKey));
+            Encoding.UTF8.GetBytes(_options.Secret));
 
         var credentials =
             new SigningCredentials(
@@ -73,14 +75,13 @@ public sealed class JWTTokenService : IJWTTokenService
 
         var refreshToken = GenerateRefreshToken();
 
-        var refreshHash =
-            SHA256.HashData(
-                Encoding.UTF8.GetBytes(refreshToken));
+        var refreshTokenHash =
+            HashRefreshToken(refreshToken);
 
         var refreshSession =
             RefreshSession.Create(
                 user.Id,
-                Convert.ToHexString(refreshHash),
+                refreshTokenHash,
                 now.AddDays(
                     _options.RefreshTokenDays));
 
@@ -100,5 +101,38 @@ public sealed class JWTTokenService : IJWTTokenService
     {
         return Convert.ToBase64String(
             RandomNumberGenerator.GetBytes(64));
+    }
+
+    private static string HashRefreshToken(string refreshToken)
+    {
+        var hash =
+            SHA256.HashData(
+                Encoding.UTF8.GetBytes(refreshToken)
+            );
+
+        return Convert.ToHexString(hash);
+    }
+
+    private void ValidateOptions()
+    {
+        if (string.IsNullOrWhiteSpace(_options.Audience))
+            throw new InvalidOperationException(
+                "JWT Audience is not configured."
+            );
+
+        if (string.IsNullOrWhiteSpace(_options.Issuer))
+            throw new InvalidOperationException(
+                "JWT Issuer is not configured."
+            );
+
+        if (string.IsNullOrWhiteSpace(_options.Secret))
+            throw new InvalidOperationException(
+                "JWT Secret is not configured."
+            );
+
+        if (_options.Secret.Length < 32)
+            throw new InvalidOperationException(
+                "JWT Secret must be contain at least 32 characters."
+            );
     }
 }
