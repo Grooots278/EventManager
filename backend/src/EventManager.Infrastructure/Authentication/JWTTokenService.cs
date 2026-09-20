@@ -1,14 +1,13 @@
-﻿using EventManager.Application.Authentication.DTOs;
+﻿using EventManager.Application.Abstractions.Authentication;
+using EventManager.Application.Authentication.DTOs;
 using EventManager.Application.Common.Interfaces;
 using EventManager.Domain.Authentication;
 using EventManager.Domain.Users;
 using EventManager.Infrastructure.Options;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Security.Cryptography;
 using System.Text;
 
 namespace EventManager.Infrastructure.Authentication;
@@ -17,13 +16,16 @@ public sealed class JWTTokenService : IJWTTokenService
 {
     private readonly JwtOptions _options;
     private readonly IApplicationDbContext _db;
+    private readonly IRefreshTokenService _refreshTokenService;
 
     public JWTTokenService(
         IOptions<JwtOptions> options,
-        IApplicationDbContext db)
+        IApplicationDbContext db,
+        IRefreshTokenService refreshTokenService)
     {
         _options = options.Value;
         _db = db;
+        _refreshTokenService = refreshTokenService;
 
         ValidateOptions();
     }
@@ -73,10 +75,10 @@ public sealed class JWTTokenService : IJWTTokenService
             new JwtSecurityTokenHandler()
                 .WriteToken(token);
 
-        var refreshToken = GenerateRefreshToken();
+        var refreshToken = _refreshTokenService.Generate();
 
         var refreshTokenHash =
-            HashRefreshToken(refreshToken);
+            _refreshTokenService.Hash(refreshToken);
 
         var refreshSession =
             RefreshSession.Create(
@@ -95,22 +97,6 @@ public sealed class JWTTokenService : IJWTTokenService
             accessToken,
             refreshToken,
             accessTokenExpires);
-    }
-
-    private static string GenerateRefreshToken()
-    {
-        return Convert.ToBase64String(
-            RandomNumberGenerator.GetBytes(64));
-    }
-
-    private static string HashRefreshToken(string refreshToken)
-    {
-        var hash =
-            SHA256.HashData(
-                Encoding.UTF8.GetBytes(refreshToken)
-            );
-
-        return Convert.ToHexString(hash);
     }
 
     private void ValidateOptions()
