@@ -1,3 +1,4 @@
+using EventManager.Application.Abstractions.Authentication;
 using EventManager.Application.Common.Interfaces;
 using EventManager.Domain.Users.ValueObjects;
 using EventManager.Infrastructure.Authentication;
@@ -21,18 +22,15 @@ public static class DependencyInjection
             {
                 options.UseNpgsql(
                     configuration.GetConnectionString(
-                        "Database"
-                    )
-                );
-            }
-        );
+                        "Database"));
+            });
 
         services.AddScoped<IApplicationDbContext>(
-            provider => provider.GetRequiredService<AppDbContext>()
-        );
+            provider => provider.GetRequiredService<AppDbContext>());
 
         services.AddScoped<IJWTTokenService, JWTTokenService>();
         services.AddScoped<IPasswordHasher, PasswordHasher>();
+        services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 
         services.Configure<JwtOptions>(
             configuration.GetSection(JwtOptions.SectionName)
