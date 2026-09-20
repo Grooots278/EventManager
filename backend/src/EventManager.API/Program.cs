@@ -1,4 +1,5 @@
 using System.Text;
+using EventManager.API.Exceptions;
 using EventManager.Application;
 using EventManager.Infrastructure;
 using EventManager.Infrastructure.Options;
@@ -59,7 +60,14 @@ builder.Services.AddAuthorization();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddProblemDetails();
+
+builder.Services.AddExceptionHandler<
+    GlobalExceptionHandler>();
+
 var app = builder.Build();
+
+app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {
