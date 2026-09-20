@@ -31,7 +31,7 @@ public sealed class RegisterCommandHandler
         RegisterCommand command,
         CancellationToken cancellationToken)
     {
-        var login = Login.Create(command.Login);
+        var login = Domain.Users.ValueObjects.Login.Create(command.Login);
         var email = Email.Create(command.Email);
         var firstName = FirstName.Create(command.FirstName);
         var lastName = LastName.Create(command.LastName);
