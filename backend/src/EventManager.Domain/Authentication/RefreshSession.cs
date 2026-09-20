@@ -30,6 +30,19 @@ public sealed class RefreshSession : Entity
         string tokenHash,
         DateTime expiresAtUtc)
     {
+
+        if (userId == Guid.Empty)
+            throw new DomainException(
+                "User id cannot be empty.");
+
+        if (string.IsNullOrWhiteSpace(tokenHash))
+            throw new DomainException(
+                "Refresh token hash is required.");
+
+        if (expiresAtUtc <= DateTime.UtcNow)
+            throw new DomainException(
+                "Refresh token expiration must be in the future.");
+
         return new RefreshSession(
             userId,
             tokenHash,
@@ -38,7 +51,9 @@ public sealed class RefreshSession : Entity
 
     public void Revoke()
     {
-        if (!IsRevoked)
-            RevokedAtUtc = DateTime.UtcNow;
+        if (RevokedAtUtc.HasValue)
+            return;
+
+        RevokedAtUtc = DateTime.UtcNow;
     }
 }
