@@ -1,6 +1,8 @@
 using System.Text;
+using EventManager.API.Authentication;
 using EventManager.API.Exceptions;
 using EventManager.Application;
+using EventManager.Application.Abstractions.Authentication;
 using EventManager.Infrastructure;
 using EventManager.Infrastructure.Options;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -64,6 +66,11 @@ builder.Services.AddProblemDetails();
 
 builder.Services.AddExceptionHandler<
     GlobalExceptionHandler>();
+
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddScoped<
+    ICurrentUser, HttpCurrentUser>();
 
 var app = builder.Build();
 
