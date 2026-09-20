@@ -51,8 +51,13 @@ public sealed class LoginCommandHandler :
             throw new UnauthorizedException(
                 "Invalid credentials.");
 
-        return await _jwtTokenService.CreateAuthenticationResponseAsync(
-            user,
-            cancellationToken);
+        var response = 
+            await _jwtTokenService.CreateAuthenticationResponseAsync(
+                user,
+                cancellationToken);
+
+        await _db.SaveChangesAsync(cancellationToken);
+
+        return response;
     }
 }

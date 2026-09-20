@@ -82,12 +82,12 @@ public sealed class RegisterCommandHandler
 
         await _db.Users.AddAsync(user, cancellationToken);
 
+        var authenticationResponse = 
+            await _jwtTokenService.CreateAuthenticationResponseAsync(
+                user, cancellationToken);
+
         await _db.SaveChangesAsync(cancellationToken);
 
-        return await _jwtTokenService.CreateAuthenticationResponseAsync
-            (
-            user,
-            cancellationToken
-            );
+        return authenticationResponse; 
     }
 }
