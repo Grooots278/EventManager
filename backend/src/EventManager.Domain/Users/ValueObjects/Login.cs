@@ -15,7 +15,8 @@ public sealed class Login : IEquatable<Login>
             throw new DomainException(
                 "Login is required.");
 
-        value = value.Trim();
+        value = value.Trim()
+            .ToLowerInvariant();
 
         if (value.Length is < 3 or > 32)
             throw new DomainException(
