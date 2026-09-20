@@ -72,6 +72,12 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<
     ICurrentUser, HttpCurrentUser>();
 
+builder.Services
+    .AddHealthChecks()
+    .AddNpgSql(
+        builder.Configuration
+            .GetConnectionString("Database")!);
+
 var app = builder.Build();
 
 app.UseExceptionHandler();
@@ -86,5 +92,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHealthChecks("/health");
 
 app.Run();
