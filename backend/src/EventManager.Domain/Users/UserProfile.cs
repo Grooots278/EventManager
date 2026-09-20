@@ -37,6 +37,16 @@ namespace EventManager.Domain.Users
             IsActive = true;
         }
 
+        public void UpdatePersonalInformation(
+            FirstName firstName,
+            LastName lastName,
+            DateOnly birtDate)
+        {
+            FirstName = firstName;
+            LastName = lastName;
+            BirthDate = birtDate;
+        }
+
         public void ChangeName(
             FirstName firstName,
             LastName lastName)
