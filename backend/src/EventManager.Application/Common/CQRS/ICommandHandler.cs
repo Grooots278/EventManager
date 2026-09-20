@@ -1,9 +1,10 @@
-﻿namespace EventManager.Application.Common.CQRS;
+﻿using MediatR;
+
+namespace EventManager.Application.Common.CQRS;
 
 public interface ICommandHandler<in TCommand, TResponse>
+    : IRequestHandler<TCommand, TResponse>
     where TCommand : ICommand<TResponse>
 {
-    Task<TResponse> Handle(
-        TCommand command,
-        CancellationToken cancellationToken);
+    
 }

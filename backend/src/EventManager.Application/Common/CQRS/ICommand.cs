@@ -1,5 +1,8 @@
-﻿namespace EventManager.Application.Common.CQRS;
+﻿using MediatR;
+
+namespace EventManager.Application.Common.CQRS;
 
 public interface ICommand<out TResponse>
+    : IRequest<TResponse>
 {
 }
