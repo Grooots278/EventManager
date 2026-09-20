@@ -1,6 +1,10 @@
 using EventManager.API.Contracts.Authentication;
+using EventManager.Application.Authentication.Commands.Login;
+using EventManager.Application.Authentication.Commands.Logout;
+using EventManager.Application.Authentication.Commands.Refresh;
 using EventManager.Application.Authentication.Commands.Register;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EventManager.API.Controllers;
@@ -14,6 +18,7 @@ public sealed class AuthController : ControllerBase
     public AuthController(ISender sender) => _sender = sender;
 
     [HttpPost("register")]
+    [AllowAnonymous]
     public async Task<ActionResult> Register(
         RegisterRequest request,
         CancellationToken cancellationToken
@@ -36,5 +41,60 @@ public sealed class AuthController : ControllerBase
             );
 
         return Ok(result);
+    }
+
+    [HttpPost("login")]
+    [AllowAnonymous]
+    public async Task<ActionResult> Login(
+        LoginRequest request,
+        CancellationToken cancellationToken)
+    {
+        var command = 
+            new LoginCommand(
+                request.Login,
+                request.Password);
+
+        var result = 
+            await _sender.Send(
+                command,
+                cancellationToken);
+
+        return Ok(result);
+    }
+
+    [HttpPost("refresh")]
+    [AllowAnonymous]
+    public async Task<ActionResult> Refresh(
+        RefreshRequest request,
+        CancellationToken cancellationToken)
+    {
+        var command = 
+            new RefreshCommand(request.RefreshToken);
+
+        var result = 
+            await _sender.Send(
+                command,
+                cancellationToken);
+
+        return Ok(result);
+    }
+
+    [HttpPost("logout")]
+    [AllowAnonymous]
+    [ProducesResponseType(
+        StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> Logout(
+        LogoutRequest request,
+        CancellationToken cancellationToken)
+    {
+        var command = 
+            new LogoutCommand(
+                request.RefreshToken);
+
+        await _sender.Send(
+            command,
+            cancellationToken);
+
+        return NoContent();
     }
 }
