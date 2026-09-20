@@ -42,6 +42,9 @@ public sealed class UserProfileConfiguration
         builder.HasIndex(x => x.Email)
             .IsUnique();
 
+        builder.Property(x => x.BirthDate)
+            .HasColumnType("date");
+
         builder.Property(x => x.Role)
             .HasConversion<string>()
             .HasMaxLength(32)
@@ -50,9 +53,18 @@ public sealed class UserProfileConfiguration
         builder.Property(x => x.IsActive)
             .IsRequired();
 
+        builder.Property(x => x.CreatedAtUtc)
+            .IsRequired();
+
+        builder.Property(x => x.UpdatedAtUtc);
+
+        builder.Property(x => x.CityId);
+
         builder.HasOne<City>()
             .WithMany()
             .HasForeignKey(x => x.CityId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasIndex(x => x.CityId);
     }
 }
