@@ -11,6 +11,7 @@ public sealed class RefreshSession : Entity
     public DateTime? RevokedAtUtc { get; private set; }
     public bool IsRevoked => RevokedAtUtc.HasValue;
     public bool IsExpired => DateTime.UtcNow >= ExpiresAtUtc;
+    public bool IsActive => !IsRevoked && !IsExpired;
 
     private RefreshSession() { }
 
