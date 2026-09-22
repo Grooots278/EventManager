@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using EventManager.Application.Abstractions.Authentication;
 using EventManager.Application.Common.Exceptions;
+using EventManager.Domain.Enums;
 
 namespace EventManager.API.Authentication;
 
@@ -50,15 +51,30 @@ public sealed class HttpCurrentUser
         }
     }
 
-    public string? Role
+    public UserRole Role
     {
         get
         {
-            return GetUser()
-                .FindFirstValue(
+            var principal = GetPrincipal();
+
+            var roleValue = 
+                principal.FindFirstValue(
                     ClaimTypes.Role);
+
+            if(!Enum.TryParse<UserRole>(
+                roleValue, 
+                out var role))
+            {
+                throw new UnauthorizedException(
+                    "User role is invalid.");
+            }
+
+            return role;
         }
     }
+
+    public bool IsInRole(UserRole role)
+        => Role == role;
 
     private ClaimsPrincipal GetUser()
     {
@@ -79,5 +95,27 @@ public sealed class HttpCurrentUser
         }
 
         return httpContext.User;
+    }
+
+    private HttpContext? HttpContext => 
+        _httpContextAccessor.HttpContext;
+
+    private ClaimsPrincipal GetPrincipal()
+    {
+        var context = HttpContext;
+
+        if (context is null)
+        {
+            throw new UnauthorizedException(
+                "HTTP context is unavailable.");
+        }
+
+        if (context.User.Identity?.IsAuthenticated != true)
+        {
+            throw new UnauthorizedException(
+                "User is not authorized.");
+        }
+
+        return context.User;
     }
 }
