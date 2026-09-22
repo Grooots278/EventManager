@@ -11,4 +11,5 @@ public sealed class BootrstrapAdminOptions
     public string Email { get; init; } = string.Empty;
     public string FirstName { get; init; } = string.Empty;
     public string LastName { get; init; } = string.Empty;
+    public DateOnly BirthDate { get; init; }
 }
