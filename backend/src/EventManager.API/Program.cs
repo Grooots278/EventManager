@@ -6,6 +6,7 @@ using EventManager.Application.Abstractions.Authentication;
 using EventManager.Application.Common.Security;
 using EventManager.Domain.Enums;
 using EventManager.Infrastructure;
+using EventManager.Infrastructure.Bootstrap;
 using EventManager.Infrastructure.Options;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -99,6 +100,14 @@ builder.Services
             .GetConnectionString("Database")!);
 
 var app = builder.Build();
+
+using var scope = app.Services.CreateScope();
+
+var initializer = 
+    scope.ServiceProvider
+        .GetRequiredService<DatabaseInitializer>();
+
+await initializer.InitializeAsync(CancellationToken.None);
 
 app.UseExceptionHandler();
 
