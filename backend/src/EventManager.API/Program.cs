@@ -3,6 +3,8 @@ using EventManager.API.Authentication;
 using EventManager.API.Exceptions;
 using EventManager.Application;
 using EventManager.Application.Abstractions.Authentication;
+using EventManager.Application.Common.Security;
+using EventManager.Domain.Enums;
 using EventManager.Infrastructure;
 using EventManager.Infrastructure.Options;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -57,7 +59,25 @@ builder.Services
         };
     });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(
+        AuthorizationPolicies.Authenticated,
+        policy =>
+        {
+            policy.RequireAuthenticatedUser();
+        });
+
+    options.AddPolicy(
+        AuthorizationPolicies.AdminOnly,
+        policy =>
+        {
+            policy.RequireAuthenticatedUser();
+
+            policy.RequireRole(
+                UserRole.Admin.ToString());
+        });
+});
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
