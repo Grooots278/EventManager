@@ -25,7 +25,8 @@ namespace EventManager.Domain.Users
             LastName lastName,
             Email email,
             DateOnly birthDate,
-            Guid? cityId)
+            Guid? cityId,
+            UserRole role)
         {
             UserId = userId;
             FirstName = firstName;
@@ -33,7 +34,7 @@ namespace EventManager.Domain.Users
             Email = email;
             BirthDate = birthDate;
             CityId = cityId;
-            Role = UserRole.User;
+            Role = role;
             IsActive = true;
         }
 

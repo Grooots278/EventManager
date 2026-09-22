@@ -1,5 +1,6 @@
 ﻿using EventManager.Domain.Abstractions;
 using EventManager.Domain.Common;
+using EventManager.Domain.Enums;
 using EventManager.Domain.Users.ValueObjects;
 
 namespace EventManager.Domain.Users;
@@ -44,7 +45,35 @@ public sealed class User : AggregateRoot, IAuditable
             lastName,
             email,
             birthDate,
-            cityId);
+            cityId,
+            UserRole.User);
+
+        return user;
+    }
+
+    public static User CreateAdmin(
+        Login login,
+        PasswordHash passwordHash,
+        FirstName firstName,
+        LastName lastName,
+        Email email,
+        DateOnly birthDate,
+        Guid? cityId
+    )
+    {
+        var user = new User(
+            login,
+            passwordHash,
+            null!);
+
+        user.Profile = new UserProfile(
+            user.Id,
+            firstName,
+            lastName,
+            email,
+            birthDate,
+            cityId,
+            UserRole.Admin);
 
         return user;
     }
