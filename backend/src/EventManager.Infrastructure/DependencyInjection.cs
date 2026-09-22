@@ -2,6 +2,7 @@ using EventManager.Application.Abstractions.Authentication;
 using EventManager.Application.Common.Interfaces;
 using EventManager.Domain.Users.ValueObjects;
 using EventManager.Infrastructure.Authentication;
+using EventManager.Infrastructure.Bootstrap;
 using EventManager.Infrastructure.Options;
 using EventManager.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -31,6 +32,12 @@ public static class DependencyInjection
         services.AddScoped<IJWTTokenService, JWTTokenService>();
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<IRefreshTokenService, RefreshTokenService>();
+
+        services.Configure<BootrstrapAdminOptions>(
+            configuration.GetSection(
+                BootrstrapAdminOptions.SectionName));
+
+        services.AddScoped<DatabaseInitializer>();
 
         services.Configure<JwtOptions>(
             configuration.GetSection(JwtOptions.SectionName)
