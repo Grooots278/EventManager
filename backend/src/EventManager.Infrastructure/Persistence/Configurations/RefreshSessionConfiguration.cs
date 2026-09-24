@@ -13,9 +13,11 @@ public sealed class RefreshSessionConfiguration
         builder.ToTable("refresh_sessions");
 
         builder.Property(x => x.UserId)
+            .HasColumnName("user_id")
             .IsRequired();
 
         builder.Property(x => x.TokenHash)
+            .HasColumnName("token_hash")
             .HasMaxLength(64)
             .IsRequired();
 
@@ -23,12 +25,15 @@ public sealed class RefreshSessionConfiguration
             .IsUnique();
 
         builder.Property(x => x.ExpiresAtUtc)
+            .HasColumnName("expires_at_utc")
             .IsRequired();
 
         builder.Property(x => x.CreatedAtUtc)
+            .HasColumnName("created_at_utc")
             .IsRequired();
 
-        builder.Property(x => x.RevokedAtUtc);
+        builder.Property(x => x.RevokedAtUtc)
+            .HasColumnName("revoked_at_utc");
 
         builder.HasOne<User>()
             .WithMany()

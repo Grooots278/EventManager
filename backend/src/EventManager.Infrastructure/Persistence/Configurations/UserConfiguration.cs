@@ -13,6 +13,7 @@ public sealed class UserConfiguration
         builder.ToTable("users");
 
         builder.Property(x => x.Login)
+            .HasColumnName("login")
             .HasConversion(
                 login => login.Value,
                 value => Login.Create(value)
@@ -24,6 +25,7 @@ public sealed class UserConfiguration
             .IsUnique();
 
         builder.Property(x => x.PasswordHash)
+            .HasColumnName("password_hash")
             .HasConversion(
                 hash => hash.Value,
                 value => PasswordHash.FromHash(value)
@@ -32,9 +34,11 @@ public sealed class UserConfiguration
             .IsRequired();
 
         builder.Property(x => x.CreatedAtUtc)
+            .HasColumnName("created_at_utc")
             .IsRequired();
 
-        builder.Property(x => x.UpdatedAtUtc);
+        builder.Property(x => x.UpdatedAtUtc)
+            .HasColumnName("updated_at_utc");
 
         builder.HasOne(x => x.Profile)
             .WithOne()

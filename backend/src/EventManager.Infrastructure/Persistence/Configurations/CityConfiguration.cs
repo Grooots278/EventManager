@@ -12,6 +12,7 @@ public sealed class CityConfiguration
         builder.ToTable("cities");
 
         builder.Property(x => x.Name)
+            .HasColumnName("name")
             .HasMaxLength(100)
             .IsRequired();
 

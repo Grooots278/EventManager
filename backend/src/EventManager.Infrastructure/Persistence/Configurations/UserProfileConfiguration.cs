@@ -15,7 +15,11 @@ public sealed class UserProfileConfiguration
 
         builder.HasKey(x => x.UserId);
 
+        builder.Property(x => x.UserId)
+            .HasColumnName("user_id");
+
         builder.Property(x => x.FirstName)
+            .HasColumnName("first_name")
             .HasConversion(
                 x => x.Value,
                 x => FirstName.Create(x)
@@ -24,6 +28,7 @@ public sealed class UserProfileConfiguration
             .IsRequired();
 
         builder.Property(x => x.LastName)
+            .HasColumnName("last_name")
             .HasConversion(
                 x => x.Value,
                 x => LastName.Create(x)
@@ -32,6 +37,7 @@ public sealed class UserProfileConfiguration
             .IsRequired();
 
         builder.Property(x => x.Email)
+            .HasColumnName("email")
             .HasConversion(
                 x => x.Value,
                 x => Email.Create(x)
@@ -43,22 +49,28 @@ public sealed class UserProfileConfiguration
             .IsUnique();
 
         builder.Property(x => x.BirthDate)
+            .HasColumnName("birth_date")
             .HasColumnType("date");
 
         builder.Property(x => x.Role)
+            .HasColumnName("role")
             .HasConversion<string>()
             .HasMaxLength(32)
             .IsRequired();
 
         builder.Property(x => x.IsActive)
+            .HasColumnName("is_active")
             .IsRequired();
 
         builder.Property(x => x.CreatedAtUtc)
+            .HasColumnName("created_at_utc")
             .IsRequired();
 
-        builder.Property(x => x.UpdatedAtUtc);
+        builder.Property(x => x.UpdatedAtUtc)
+            .HasColumnName("updated_at_utc");
 
-        builder.Property(x => x.CityId);
+        builder.Property(x => x.CityId)
+            .HasColumnName("city_id");
 
         builder.HasOne<City>()
             .WithMany()
