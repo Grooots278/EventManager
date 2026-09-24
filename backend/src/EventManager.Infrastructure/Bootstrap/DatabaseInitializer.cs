@@ -31,23 +31,23 @@ public sealed class DatabaseInitializer
 
         ValidateOptions();
 
-        var adminExsists = 
-            await _db.UserProfiles
-                .AnyAsync(
-                    x => x.Email.Value == 
-                        _options.Email.ToLower(),
-                        cancellationToken);
-
-        if (adminExsists)
-        {
-            return;
-        }
+        var email = 
+            Email.Create(
+                _options.Email);
 
         var login = 
             Login.Create(_options.Login);
 
-        var email =
-            Email.Create(_options.Email);
+        var adminAlreadyExists = 
+            await _db.UserProfiles
+                .AnyAsync(
+                    x => x.Email == email,
+                    cancellationToken);
+
+        if (adminAlreadyExists)
+        {
+            return;
+        }
 
         var existinglogin = 
             await _db.Users
@@ -57,7 +57,8 @@ public sealed class DatabaseInitializer
 
         if (existinglogin)
         {
-            return;
+            throw new InvalidOperationException(
+                "Bootstrap admin login is already used by another user.");
         }
 
         var passwordHash = 
@@ -84,25 +85,43 @@ public sealed class DatabaseInitializer
         if (string.IsNullOrWhiteSpace(_options.Login))
         {
             throw new InvalidOperationException(
-                "Bootrstrap admin login is missing.");
+                "BootrstrapAdmin: login is required.");
         }
 
         if (string.IsNullOrWhiteSpace(_options.Password))
         {
             throw new InvalidOperationException(
-                "Bootrstrap admin password is missing.");
+                "BootrstrapAdmin: password is required.");
         }
 
         if (string.IsNullOrWhiteSpace(_options.Email))
         {
             throw new InvalidOperationException(
-                "Bootrstrap admin email is missing.");
+                "BootrstrapAdmin: email is required.");
         }
 
         if (_options.Password.Length < 12)
         {
             throw new InvalidOperationException(
-                "Bootrstrap admin password must contain at least 12 characters.");
+                "BootrstrapAdmin: password must contain at least 12 characters.");
+        }
+
+        if (string.IsNullOrWhiteSpace(_options.FirstName))
+        {
+            throw new InvalidOperationException(
+                "BootstrapAdmin: FirstName is required.");
+        }
+
+        if (string.IsNullOrWhiteSpace(_options.LastName))
+        {
+            throw new InvalidOperationException(
+                "BootstrapAdmin: LastName is required.");
+        }
+
+        if (string.IsNullOrWhiteSpace(_options.Email))
+        {
+            throw new InvalidOperationException(
+                "BootstrapAdmin: Email is required.");
         }
     }
 }
