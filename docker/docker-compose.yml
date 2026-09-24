@@ -28,7 +28,7 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
 
-      ConnectionStrings_Database: >-
+      ConnectionStrings__Database: >-
         Host=postgres;
         Port=5432;
         Database=eventmanager;
@@ -68,13 +68,13 @@ services:
 
       Jwt__RefreshTokenDays: 30
 
-      BootstrapAdmin_Enabled: "True"
-      BootstrapAdmin_Login: "admin"
-      BootstrapAdmin_Password: "ChangeMeDevelopmentPassword123!"
-      BootstrapAdmin_Email: "admin@example.com"
-      BootstrapAdmin_FirstName: "System"
-      BootstrapAdmin_LastName: Administrator
-      BootstrapAdmin_BirthDate: "2002-08-27"
+      BootstrapAdmin__Enabled: "True"
+      BootstrapAdmin__Login: "admin"
+      BootstrapAdmin__Password: "ChangeMeDevelopmentPassword123!"
+      BootstrapAdmin__Email: "admin@example.com"
+      BootstrapAdmin__FirstName: "System"
+      BootstrapAdmin__LastName: Administrator
+      BootstrapAdmin__BirthDate: "2002-08-27"
 
   frontend:
     build:
