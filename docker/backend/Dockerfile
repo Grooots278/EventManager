@@ -18,11 +18,14 @@ WORKDIR /src/src/EventManager.API
 RUN dotnet publish EventManager.API.csproj \
     -c Release \
     -o /app/publish \
-    --no-restore
+    --no-restore \
+    /p:UseAppHost=false
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 
 WORKDIR /app
+
+ENV ASPNETCORE_URLS=http://+:8080
 
 COPY --from=build /app/publish .
 
