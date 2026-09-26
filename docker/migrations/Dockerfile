@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS migrator
+FROM mcr.microsoft.com/dotnet/sdk:10.0
 
 WORKDIR /src
 
@@ -25,7 +25,7 @@ WORKDIR /src
 
 RUN dotnet tool install \
     --global dotnet-ef \
-    --version 10.0.12
+    --version 10.0.*
 
 ENV PATH="${PATH}:/root/.dotnet/tools"
 
