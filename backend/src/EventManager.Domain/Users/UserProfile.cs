@@ -52,7 +52,7 @@ namespace EventManager.Domain.Users
             FirstName firstName,
             LastName lastName)
         {
-            if (firstName == FirstName && LastName == LastName) return;
+            if (firstName == FirstName && lastName == LastName) return;
 
             FirstName = firstName;
             LastName = lastName;
