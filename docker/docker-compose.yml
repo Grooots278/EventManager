@@ -4,18 +4,19 @@ services:
     image: postgres:17
     container_name: eventmanager-postgres
     environment:
-      POSTGRES_DB: eventmanager
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d eventmanager"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 10
+      start_period: 10s
 
   migrator:
     build:
@@ -31,9 +32,9 @@ services:
       ConnectionStrings__Database: >-
         Host=postgres;
         Port=5432;
-        Database=eventmanager;
-        Username=postgres;
-        Password=postgres
+        Database=${POSTGRES_DB};
+        Username=${POSTGRES_USER};
+        Password=${POSTGRES_PASSWORD}
 
   backend:
     build:
@@ -47,33 +48,35 @@ services:
         condition: service_healthy
       migrator:
         condition: service_completed_successfully
+      rabbitmq:
+        condition: service_started
     environment:
       ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
 
       ConnectionStrings_Database: >-
         Host=postgres;
         Port=5432;
-        Database=eventmanager;
-        Username=postgres;
-        Password=postgres;
+        Database=${POSTGRES_DB};
+        Username=${POSTGRES_USER};
+        Password=${POSTGRES_PASSWORD};
 
-      Jwt__Issuer: EventManager
+      Jwt__Issuer: ${JWT_ISSUER}
 
-      Jwt__Audience: EventManager.API
+      Jwt__Audience: ${JWT_AUDIENCE}
 
-      Jwt__Secret: >-
-        development-only-super-secret-key-change-this
+      Jwt__Secret: ${JWT_SECRET}
 
       Jwt__AccessTokenMinutes: 15
 
       Jwt__RefreshTokenDays: 30
 
-      BootstrapAdmin__Enabled: "True"
-      BootstrapAdmin__Login: "admin"
-      BootstrapAdmin__Password: "ChangeMeDevelopmentPassword123!"
-      BootstrapAdmin__Email: "admin@example.com"
-      BootstrapAdmin__FirstName: "System"
-      BootstrapAdmin__LastName: Administrator
+      BootstrapAdmin__Enabled: ${BOOTSTRAP_ADMIN_ENABLED}
+      BootstrapAdmin__Login: ${BOOTSTRAP_ADMIN_LOGIN}
+      BootstrapAdmin__Password: ${BOOTSTRAP_ADMIN_PASSWORD}
+      BootstrapAdmin__Email: ${BOOTSTRAP_ADMIN_EMAIL}
+      BootstrapAdmin__FirstName: ${BOOTSTRAP_ADMIN_FIRST_NAME}
+      BootstrapAdmin__LastName: ${BOOTSTRAP_ADMIN_LAST_NAME}
       BootstrapAdmin__BirthDate: "2002-08-27"
 
   frontend:
@@ -90,8 +93,8 @@ services:
     image: dpage/pgadmin4
     container_name: eventmanager-pgadmin
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@example.com
-      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
     ports:
       - "5050:80"
     depends_on:
@@ -104,6 +107,11 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   postgres_data:
