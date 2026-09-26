@@ -5,6 +5,7 @@ using EventManager.Infrastructure.Authentication;
 using EventManager.Infrastructure.Bootstrap;
 using EventManager.Infrastructure.Options;
 using EventManager.Infrastructure.Persistence;
+using EventManager.Infrastructure.Persistence.Interceptors;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,6 +19,10 @@ public static class DependencyInjection
         IConfiguration configuration
     )
     {
+        services.AddSingleton(TimeProvider.System);
+
+        services.AddSingleton<AuditableInterceptor>();
+
         var connectionString = 
             configuration.GetConnectionString(
                 "Database")
@@ -25,10 +30,13 @@ public static class DependencyInjection
                 "Database connection string is missing");
 
         services.AddDbContext<AppDbContext>(
-            options =>
+            (sp, options) =>
             {
                 options.UseNpgsql(
                     connectionString);
+
+                options.AddInterceptors(
+                    sp.GetRequiredService<AuditableInterceptor>());
             });
 
         services.AddScoped<IApplicationDbContext>(
