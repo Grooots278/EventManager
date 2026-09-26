@@ -101,14 +101,6 @@ builder.Services
 
 var app = builder.Build();
 
-using var scope = app.Services.CreateScope();
-
-var initializer = 
-    scope.ServiceProvider
-        .GetRequiredService<DatabaseInitializer>();
-
-await initializer.InitializeAsync(CancellationToken.None);
-
 app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
@@ -124,4 +116,16 @@ app.MapControllers();
 
 app.MapHealthChecks("/health");
 
-app.Run();
+await using (var scope =
+    app.Services.CreateAsyncScope())
+{
+    var initializer = 
+        scope.ServiceProvider
+            .GetRequiredService<
+                DatabaseInitializer>();
+
+    await initializer.InitializeAsync(
+        CancellationToken.None);
+}
+
+await app.RunAsync();
