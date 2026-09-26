@@ -10,11 +10,11 @@ namespace EventManager.API.Controllers;
 [Authorize(
     Policy = 
         AuthorizationPolicies.AdminOnly)]
-public sealed class AadminController : ControllerBase
+public sealed class AdminController : ControllerBase
 {
     private readonly ICurrentUser _currentUser;
 
-    public AadminController(ICurrentUser currentUser) 
+    public AdminController(ICurrentUser currentUser) 
         => _currentUser = currentUser;
 
     [HttpGet("me")]
