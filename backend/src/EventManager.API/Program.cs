@@ -116,13 +116,14 @@ app.MapControllers();
 
 app.MapHealthChecks("/health");
 
-await using (var scope =
-    app.Services.CreateAsyncScope())
+if (!app.Environment.IsEnvironment("Testing"))
 {
-    var initializer = 
+    await using var scope =
+        app.Services.CreateAsyncScope();
+
+    var initializer =
         scope.ServiceProvider
-            .GetRequiredService<
-                DatabaseInitializer>();
+            .GetRequiredService<DatabaseInitializer>();
 
     await initializer.InitializeAsync(
         CancellationToken.None);
