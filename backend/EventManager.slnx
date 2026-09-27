@@ -7,6 +7,9 @@
     <Project Path="src/EventManager.Worker/EventManager.Worker.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/EventManager.API.IntegrationTests/EventManager.API.IntegrationTests.csproj" />
+    <Project Path="tests/EventManager.Application.UnitTests/EventManager.Application.UnitTests.csproj" />
+    <Project Path="tests/EventManager.Domain.UnitTests/EventManager.Domain.UnitTests.csproj" />
     <Project Path="tests/EventManager.IntegrationTests/EventManager.IntegrationTests.csproj" />
     <Project Path="tests/EventManager.UnitTests/EventManager.UnitTests.csproj" />
   </Folder>
