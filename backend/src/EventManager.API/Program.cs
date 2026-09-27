@@ -129,3 +129,8 @@ await using (var scope =
 }
 
 await app.RunAsync();
+
+public partial class Program
+{
+    
+}
