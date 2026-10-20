@@ -82,7 +82,7 @@ public sealed class ApiFixture
                         "AdminPassword123456!")),
                 FirstName.Create("System"),
                 LastName.Create("Administrator"),
-                Email.Create("admin.test.local"),
+                Email.Create("admin@test.local"),
                 new DateOnly(1990, 1, 1),
                 null
             );

@@ -1,4 +1,5 @@
 ﻿using EventManager.Application.Authentication.DTOs;
+using EventManager.Domain.Users.ValueObjects;
 using EventManager.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -61,7 +62,7 @@ public sealed class AuditTests
             await db.Users
                 .Include(x => x.Profile)
                 .SingleAsync(
-                    x => x.Login.Value == login,
+                    x => x.Login == Login.Create(login),
                     TestContext.Current.CancellationToken);
 
         Assert.NotEqual(
@@ -127,7 +128,7 @@ public sealed class AuditTests
                 await db.Users
                     .Include(x => x.Profile)
                     .SingleAsync(
-                        x => x.Login.Value == login,
+                        x => x.Login == Login.Create(login),
                     TestContext.Current.CancellationToken);
 
             createdAt = user.Profile.CreatedAtUtc;
@@ -196,7 +197,7 @@ public sealed class AuditTests
                 await db.Users
                     .Include(x => x.Profile)
                     .SingleAsync(
-                        x => x.Login.Value == login,
+                        x => x.Login == Login.Create(login),
                         TestContext.Current.CancellationToken);
 
             Assert.Equal(
