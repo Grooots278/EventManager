@@ -143,7 +143,7 @@ export function RegisterPage() {
                 }
                 maxLength={100}
                 required
-                placeholder="Имя"
+                placeholder="Name"
               />
             </label>
 

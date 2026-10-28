@@ -53,7 +53,7 @@ export function AppLayout() {
                                     isActive ? "is-active" : ""
                                     }`
                                 }>
-                                 Профиль
+                                 Profile
                             </NavLink>
                         )}
                     </nav>
@@ -61,7 +61,7 @@ export function AppLayout() {
                     <div className="site-header__actions">
                         {status === "loading" ? (
                             <span className="header-status">
-                                Загрузка...
+                                Loading...
                             </span>
                         ) : status === "authenticated" ? (
                             <>
@@ -74,7 +74,7 @@ export function AppLayout() {
                                     className="button button--secondary button--small"
                                     onClick={handleLogout}
                                 >
-                                    Выйти
+                                    Exit
                                 </button>
                             </>
                         ) : (
@@ -83,14 +83,14 @@ export function AppLayout() {
                                     to="/login"
                                     className="button button--secondary button--small"
                                 >
-                                    Войти
+                                    Enter
                                 </Link>
 
                                 <Link
                                     to="/register"
                                     className="button button--primary button--small"
                                 >
-                                    Регистрация
+                                    Registration
                                 </Link>
                             </>
                         )}
@@ -105,7 +105,7 @@ export function AppLayout() {
             <footer className="site-footer">
                 <div className="site-footer__inner">
                     <span>EventManager</span>
-                    <span>Находи мероприятия по интересам</span>
+                    <span>Find events based on your interests</span>
                 </div>
             </footer>
         </div>
