@@ -34,6 +34,23 @@ export class ApiError extends Error {
     }
 }
 
+type UnauthorizedHandler =
+    () => Promise<string | null>;
+
+let unauthorizedHandler : UnauthorizedHandler | null = null;
+
+export function registerUnauthorizedHandler(
+    handler: UnauthorizedHandler,
+) : () => void {
+    unauthorizedHandler = handler;
+
+    return () => {
+        if (unauthorizedHandler === handler) {
+            unauthorizedHandler = null;
+        }
+    };
+}
+
 function isRecord(
     value: unknown,
 ) : value is Record<string, unknown>{
@@ -90,10 +107,41 @@ function parseProblemDetails(
     };
 }
 
+async function throwApiError(
+    response: Response,
+) : Promise<never> {
+    const contentType = 
+        response.headers.get("content-type") ?? "";
+
+    let body : unknown;
+
+    if (contentType.includes("application/json")) {
+        body = await response.json().catch(() => undefined);
+    } else {
+        body = await response.text().catch(() => "");
+    }
+
+    const problem = parseProblemDetails(body);
+
+    const message = 
+        problem.detail ||
+        problem.title ||
+        (typeof body === "string" && body.length > 0
+            ? body
+            : `Request failed with status ${response.status}.`);
+
+    throw new ApiError(
+        response.status,
+        message,
+        problem.title,
+        problem.errors
+    );
+}
+
 export async function apiRequest<T>(
-    path: string,
-    options: ApiRequestOptions = {},
-) : Promise<T> {
+  path: string,
+  options: ApiRequestOptions = {},
+): Promise<T> {
     const {
         json,
         accessToken,
@@ -101,72 +149,79 @@ export async function apiRequest<T>(
         ...requestOptions
     } = options;
 
-    const headers = new Headers(customHeaders);
-
-    headers.set("Accept", "application/json");
-
-    if (json !== undefined) {
-        headers.set("Content-Type", "application/json");
-    }
-
-    if (accessToken) 
-    {
-        headers.set(
-            "Authorization",
-            `Bearer ${accessToken}`,);
-    }
-
     const normalizedPath = path.startsWith("/")
         ? path
-        : `/{path}`;    
+        : `/${path}`;
 
     const url = `${API_BASE_URL}${normalizedPath}`;
 
-    const response = await fetch(url, {
-        ...requestOptions,
-        headers,
-        credentials: "include",
+    const body =
+        json === undefined
+        ? undefined
+        : JSON.stringify(json);
 
-        ...(json !== undefined
-            ? { body: JSON.stringify(json) }
-            : {}
-        ),
-    });
+    const sendRequest = (
+        token: string | null | undefined,
+    ): Promise<Response> => {
+        const headers = new Headers(customHeaders);
 
-    if (response.status === 204 ||
-        response.status === 205
-    ) { return undefined as T; }
+        headers.set("Accept", "application/json");
 
-    const contentType = 
-        response.headers.get("content-type") ?? "";
+        if (json !== undefined) {
+            headers.set("Content-Type", "application/json");
+        }
 
-    let responseBody : unknown;
+        if (token) {
+            headers.set("Authorization", `Bearer ${token}`);
+        }
 
-    if (contentType.includes("application/json")) {
-        responseBody = await response.json().catch(() => undefined);
-    } else {
-        responseBody = await response.text().catch(() => "");
+        return fetch(url, {
+            ...requestOptions,
+            headers,
+            credentials: "include",
+            body,
+        });
+    };
+
+    let response = await sendRequest(accessToken);
+
+  
+    if (
+        response.status === 401 &&
+        accessToken &&
+        unauthorizedHandler &&
+        !requestOptions.signal?.aborted
+    ) {
+        const refreshedToken =
+        await unauthorizedHandler();
+
+    
+        if (
+            refreshedToken &&
+            refreshedToken !== accessToken &&
+            !requestOptions.signal?.aborted
+        ) {
+            response = await sendRequest(refreshedToken);
+        }
     }
 
     if (!response.ok) {
-        const problem = parseProblemDetails(responseBody);
-
-        const message =
-            problem.detail ||
-            problem.title ||
-            (typeof responseBody === "string" &&
-                responseBody.length > 0
-                ? responseBody
-                : `Request failed with status ${response.status}.`
-            );
-
-        throw new ApiError(
-            response.status,
-            message,
-            problem.title,
-            problem.errors
-        );
+        await throwApiError(response);
     }
 
-    return responseBody as T;
+    if (
+        response.status === 204 ||
+        response.status === 205
+    ) {
+        return undefined as T;
+    }
+
+    const contentType =
+        response.headers.get("content-type") ?? "";
+
+    if (contentType.includes("application/json")) {
+        return (await response.json()) as T;
+    }
+
+    return (await response.text()) as T;
 }
