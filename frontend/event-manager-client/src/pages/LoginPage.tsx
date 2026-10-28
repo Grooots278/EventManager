@@ -1,6 +1,6 @@
 import {
   useState,
-  type FormEvent,
+  type SubmitEvent,
 } from "react";
 
 import {
@@ -31,7 +31,7 @@ export function LoginPage() {
     useState(false);
 
   async function handleSubmit(
-    event: FormEvent<HTMLFormElement>,
+    event: SubmitEvent<HTMLFormElement>,
   ) {
     event.preventDefault();
 
@@ -51,7 +51,6 @@ export function LoginPage() {
       const destination =
         state?.from?.pathname ?? "/profile";
 
-      // Не разрешаем redirect на произвольный внешний URL.
       const safeDestination =
         destination.startsWith("/") &&
         !destination.startsWith("//")
@@ -65,12 +64,12 @@ export function LoginPage() {
       if (exception instanceof ApiError) {
         setError(
           exception.status === 401
-            ? "Неверный логин или пароль."
+            ? "Invalid username or password."
             : exception.message,
         );
       } else {
         setError(
-          "Не удалось выполнить вход. Проверь подключение и попробуй ещё раз.",
+          "Failed to log in. Check the connection and try again.",
         );
       }
     } finally {
@@ -83,13 +82,13 @@ export function LoginPage() {
       <div className="auth-card">
         <div className="auth-card__heading">
           <span className="eyebrow">
-            С ВОЗВРАЩЕНИЕМ
+            welcome back
           </span>
 
-          <h1>Войти в аккаунт</h1>
+          <h1>Log in to your account</h1>
 
           <p>
-            Войди, чтобы управлять своим профилем.
+            Log in to manage your profile.
           </p>
         </div>
 
@@ -101,7 +100,7 @@ export function LoginPage() {
             className="form-field"
             htmlFor="login"
           >
-            <span>Логин</span>
+            <span>Login</span>
 
             <input
               id="login"
@@ -116,7 +115,7 @@ export function LoginPage() {
               maxLength={32}
               required
               autoFocus
-              placeholder="Твой логин"
+              placeholder="Your login"
             />
           </label>
 
@@ -124,7 +123,7 @@ export function LoginPage() {
             className="form-field"
             htmlFor="password"
           >
-            <span>Пароль</span>
+            <span>Password</span>
 
             <input
               id="password"
@@ -136,7 +135,7 @@ export function LoginPage() {
                 setPassword(event.target.value)
               }
               required
-              placeholder="Введи пароль"
+              placeholder="Input password"
             />
           </label>
 
@@ -155,15 +154,15 @@ export function LoginPage() {
             disabled={isSubmitting}
           >
             {isSubmitting
-              ? "Выполняем вход..."
-              : "Войти"}
+              ? "Logging in..."
+              : "Enter"}
           </button>
         </form>
 
         <p className="auth-card__footer">
-          Ещё нет аккаунта?{" "}
+          There is no account yet?{" "}
           <Link to="/register">
-            Зарегистрироваться
+            Register
           </Link>
         </p>
       </div>
