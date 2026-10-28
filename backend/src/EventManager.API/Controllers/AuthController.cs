@@ -3,6 +3,8 @@ using EventManager.Application.Authentication.Commands.Login;
 using EventManager.Application.Authentication.Commands.Logout;
 using EventManager.Application.Authentication.Commands.Refresh;
 using EventManager.Application.Authentication.Commands.Register;
+using EventManager.Application.Authentication.DTOs;
+using EventManager.Application.Common.Exceptions;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,14 +15,33 @@ namespace EventManager.API.Controllers;
 [Route("api/auth")]
 public sealed class AuthController : ControllerBase
 {
-    private readonly ISender _sender;
+    private const string RefreshCookieName =
+        "eventmanager.refresh";
+    
+    private const string RefreshCookiePath =
+        "/api/auth";
 
-    public AuthController(ISender sender) => _sender = sender;
+    private readonly ISender _sender;
+    private readonly IConfiguration _configuration;
+    private readonly IHostEnvironment _environment;
+
+    public AuthController(ISender sender,
+        IConfiguration configuration,
+        IHostEnvironment environment)
+    {
+        _sender = sender;  
+        _configuration = configuration;
+        _environment = environment;
+    } 
 
     [HttpPost("register")]
     [AllowAnonymous]
-    public async Task<ActionResult> Register(
-        RegisterRequest request,
+    [ProducesResponseType(
+        typeof(AuthTokenResponse),
+        StatusCodes.Status200OK
+    )]
+    public async Task<ActionResult<AuthTokenResponse>> Register(
+        [FromBody] RegisterRequest request,
         CancellationToken cancellationToken
     )
     {
@@ -40,13 +61,19 @@ public sealed class AuthController : ControllerBase
                 cancellationToken
             );
 
-        return Ok(result);
+        SetRefreshTokenCookie(result.RefreshToken);
+
+        return Ok(ToPublicResponse(result));
     }
 
     [HttpPost("login")]
     [AllowAnonymous]
-    public async Task<ActionResult> Login(
-        LoginRequest request,
+    [ProducesResponseType(
+        typeof(AuthTokenResponse),
+        StatusCodes.Status200OK
+    )]
+    public async Task<ActionResult<AuthTokenResponse>> Login(
+        [FromBody] LoginRequest request,
         CancellationToken cancellationToken)
     {
         var command = 
@@ -59,24 +86,36 @@ public sealed class AuthController : ControllerBase
                 command,
                 cancellationToken);
 
-        return Ok(result);
+        SetRefreshTokenCookie(result.RefreshToken);
+
+        return Ok(ToPublicResponse(result));
     }
 
     [HttpPost("refresh")]
     [AllowAnonymous]
-    public async Task<ActionResult> Refresh(
-        RefreshRequest request,
+    [ProducesResponseType(
+        typeof(AuthTokenResponse),
+        StatusCodes.Status200OK
+    )]
+    public async Task<ActionResult<AuthTokenResponse>> Refresh(
         CancellationToken cancellationToken)
     {
-        var command = 
-            new RefreshCommand(request.RefreshToken);
+        var refreshToken = 
+            Request.Cookies[RefreshCookieName];
 
-        var result = 
-            await _sender.Send(
-                command,
-                cancellationToken);
+        if (string.IsNullOrWhiteSpace(refreshToken))
+        {
+            throw new UnauthorizedException(
+                "Refresh token is missing.");
+        }
 
-        return Ok(result);
+        var result = await _sender.Send(
+            new RefreshCommand(refreshToken),
+            cancellationToken);
+
+        SetRefreshTokenCookie(result.RefreshToken);
+
+        return Ok(ToPublicResponse(result));
     }
 
     [HttpPost("logout")]
@@ -84,17 +123,73 @@ public sealed class AuthController : ControllerBase
     [ProducesResponseType(
         StatusCodes.Status204NoContent)]
     public async Task<IActionResult> Logout(
-        LogoutRequest request,
         CancellationToken cancellationToken)
     {
-        var command = 
-            new LogoutCommand(
-                request.RefreshToken);
+        var refreshToken = 
+            Request.Cookies[RefreshCookieName];
 
-        await _sender.Send(
-            command,
-            cancellationToken);
+        if (!string.IsNullOrWhiteSpace(refreshToken))
+        {
+            await _sender.Send(
+                new LogoutCommand(refreshToken),
+                cancellationToken);
+        }
 
+        ClearRefreshTokenCookie();
+        
         return NoContent();
+    }
+
+    private static AuthTokenResponse ToPublicResponse(
+        AuthenticationResponse result)
+    {
+        return new AuthTokenResponse(
+            result.AccessToken,
+            result.AccessTokenExpiresAtUts);
+    }
+
+    private void SetRefreshTokenCookie(
+        string refreshToken)
+    {
+        var refreshTokenDays = 
+            _configuration.GetValue<int>(
+                "JWT:RefreshTokenDays", 30);
+
+        if (refreshTokenDays <= 0)
+        {
+            throw new InvalidOperationException(
+                "Jwt: RefreshTokenDays must be positive.");
+        }
+
+        Response.Cookies.Append(
+            RefreshCookieName,
+            refreshToken,
+            new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = _configuration.GetValue<bool?>(
+                    "Authentication:RefreshCookieSecure"
+                ) ?? _environment.IsProduction(),
+                SameSite = SameSiteMode.Lax,
+                Path = RefreshCookiePath,
+                MaxAge = TimeSpan.FromDays(
+                    refreshTokenDays),
+                IsEssential = true
+            });
+    }
+
+    private void ClearRefreshTokenCookie()
+    {
+        Response.Cookies.Delete(
+            RefreshCookieName,
+            new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = _configuration.GetValue<bool?>(
+                    "Authentication:RefreshCookieSecure")
+                    ?? _environment.IsProduction(),
+                SameSite = SameSiteMode.Lax,
+                Path = RefreshCookiePath
+            });
     }
 }
