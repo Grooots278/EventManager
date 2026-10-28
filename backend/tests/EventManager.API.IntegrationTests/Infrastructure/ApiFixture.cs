@@ -75,7 +75,7 @@ public sealed class ApiFixture
         }
 
         var admin = 
-            User.Create(
+            User.CreateAdmin(
                 Login.Create("admin"),
                 PasswordHash.FromHash(
                     passwordHasher.Hash(

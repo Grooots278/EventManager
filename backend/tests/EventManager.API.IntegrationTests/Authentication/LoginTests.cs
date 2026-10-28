@@ -38,7 +38,7 @@ public sealed class LoginTests
                 {
                     login,
                     password =
-                        "VeryStringPassword123!"
+                        "VeryStrongPassword123!"
                 },
                 TestContext.Current.CancellationToken);
 
@@ -91,7 +91,7 @@ public sealed class LoginTests
     }
 
     [Fact]
-    public async Task Login_ShouldRejectUnlnowUser()
+    public async Task Login_ShouldRejectUnknowUser()
     {
         var response =
             await _fixture.Client
@@ -100,7 +100,7 @@ public sealed class LoginTests
                 new
                 {
                     login =
-                        "does-not-exist",
+                        "does_not_exist",
                     password =
                         "VeryStrongPassword123!"
                 },

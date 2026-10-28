@@ -75,7 +75,7 @@ public sealed class RegisterTests
                 login,
                 password =
                     "VeryStrongPassword123!",
-                fistName =
+                firstName =
                     "First",
                 lastName =
                     "User",
